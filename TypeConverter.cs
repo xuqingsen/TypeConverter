@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Data;
 using System.Collections.Specialized;
+using System.IO;
 
 namespace XqsLibrary
 {

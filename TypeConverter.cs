@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Data;
@@ -17,12 +17,19 @@ namespace XqsLibrary
 
         static void SetValue<T>(object value, PropertyInfo property, T Model)
         {
+            if (!property.CanWrite)
+                return;
             bool isNullable = property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == _nullableType;
             Type targetType = property.PropertyType;
             if (isNullable)
-                targetType = property.PropertyType.GetGenericArguments()[0];
-            if (targetType.IsPrimitive || targetType.Name == "String")//避免自定义Class等非基础类型抛出异常
-                property.SetValue(Model, Convert.ChangeType(value, targetType), null);
+                targetType = property.PropertyType.GetGenericArguments()[0];            
+            if (targetType.IsValueType || targetType.Name == "String")//避免自定义Class等非基础类型抛出异常
+            {
+                if (targetType.IsEnum)
+                    property.SetValue(Model, Enum.Parse(targetType, value.ToString()), null);
+                else
+                    property.SetValue(Model, Convert.ChangeType(value, targetType), null);
+            }
         }
 
         static void SetValue<T>(DataRow dr, PropertyInfo property, string colName, T Model)
@@ -267,7 +274,7 @@ namespace XqsLibrary
                 if (upDics.ContainsKey(tp.Name))
                 {
                     value = tp.GetValue(sourceObj, null);
-                    upDics[tp.Name].SetValue(destObj, Convert.ChangeType(value, upDics[tp.Name].PropertyType), null);
+                    upDics[tp.Name].SetValue(destObj, value, null);
                 }
             }
             result = true;
@@ -550,7 +557,5 @@ namespace XqsLibrary
             }
             return dics;
         }
-
-
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Data;
@@ -557,5 +557,7 @@ namespace XqsLibrary
             }
             return dics;
         }
+
+
     }
 }

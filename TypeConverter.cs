@@ -22,7 +22,7 @@ namespace XqsLibrary
             bool isNullable = property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == _nullableType;
             Type targetType = property.PropertyType;
             if (isNullable)
-                targetType = property.PropertyType.GetGenericArguments()[0];            
+                targetType = property.PropertyType.GetGenericArguments()[0];
             if (targetType.IsValueType || targetType.Name == "String")//避免自定义Class等非基础类型抛出异常
             {
                 if (targetType.IsEnum)
@@ -290,10 +290,9 @@ namespace XqsLibrary
         /// <param name="dr"></param>
         /// <returns></returns>
         public static T ToModel<T>(DataRow dr) where T : class,new()
-        {
-            bool result = false;
-            T t = ToModel<T>(dr, null, out result);
-            return result ? t : null;
+        {            
+            T t = ToModel<T>(dr, null, false);
+            return t;
         }
 
         /// <summary>
@@ -301,39 +300,36 @@ namespace XqsLibrary
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="dr"></param>
-        /// <param name="result"></param>
+        /// <param name="propMaps">
+        /// 实体类属性名与DataRow字段名对应关系
+        /// <para>实体类属性名大小写敏感</para>
+        /// </param>
+        /// <param name="ignoreOthers">是否忽略其它不在<paramref name="propMaps"/>中的属性</param>
         /// <returns></returns>
-        public static T ToModel<T>(DataRow dr, Dictionary<string, string> maps, out bool result) where T : class,new()
+        public static T ToModel<T>(DataRow dr, Dictionary<string, string> propMaps, bool ignoreOthers) where T : class,new()
         {
-            result = true;
             T Model = null;
             if (dr != null)
             {
                 Model = new T();
                 Type modelType = Model.GetType();
                 PropertyInfo[] properties = modelType.GetProperties();
-                string colName;
                 try
                 {
                     foreach (PropertyInfo property in properties)
                     {
-                        if (maps != null && maps.ContainsKey(property.Name))
-                            colName = maps[property.Name];
-                        else
+                        if (propMaps != null && propMaps.ContainsKey(property.Name))
+                            SetValue(dr, property, propMaps[property.Name], Model);
+                        else if (!ignoreOthers)
                         {
-                            colName = property.Name;
+                            SetValue(dr, property, property.Name, Model);
                         }
-                        SetValue(dr, property, colName, Model);
                     }
                 }
                 catch
                 {
-                    Model = null; result = false;
+                    Model = null; ignoreOthers = false;
                 }
-            }
-            else
-            {
-                result = false;
             }
             return Model;
         }

@@ -554,6 +554,29 @@ namespace XqsLibrary
             return dics;
         }
 
+        /// <summary>
+        /// 将string集合转换成泛型集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="strs"></param>
+        /// <returns></returns>
+        public static List<T> ToList<T>(IEnumerable<string> strs) where T : struct 
+        {
+            if (strs != null) {
+                Type type=typeof(T);
+                List<T> list = new List<T>();
+                try
+                {
+                    foreach (string str in strs)
+                    {
+                        list.Add((T)Convert.ChangeType(str, type));
+                    }
+                }
+                catch { list = null; }
+                return list;
+            }
+            return null;
+        }
 
     }
 }

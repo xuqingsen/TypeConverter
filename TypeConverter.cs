@@ -334,6 +334,12 @@ namespace XqsLibrary
             return Model;
         }
 
+        public static T ToModel<T>(DataRow dr, params string[] ignores) where T : class,new() {
+            T model = new T();
+            bool result;
+            return ToModel<T>(dr, out result, ignores);
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -373,6 +379,11 @@ namespace XqsLibrary
             return model;
         }
 
+        public static List<T> ToModel<T>(DataTable table) where T : class,new() {
+            bool success;
+            return ToModel<T>(table, out success);
+        }
+
         /// <summary>
         /// 将DataTable对象转换成实体类集合
         /// </summary>
@@ -380,12 +391,13 @@ namespace XqsLibrary
         /// <param name="table"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static List<T> ToModelList<T>(DataTable table, out bool result) where T : class,new()
+        public static List<T> ToModel<T>(DataTable table, out bool result) where T : class,new()
         {
             result = true;
-            List<T> list = new List<T>();
+            List<T> list = null;
             if (table != null)
             {
+                list = new List<T>();
                 T Model = new T();
                 Type modelType = Model.GetType();
                 PropertyInfo[] properties = modelType.GetProperties();
@@ -403,6 +415,7 @@ namespace XqsLibrary
                 }
                 catch
                 {
+                    list = null;
                     result = false;
                 }
             }

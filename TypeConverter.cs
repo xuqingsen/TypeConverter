@@ -242,7 +242,7 @@ namespace XqsLibrary
         }
 
         /// <summary>
-        /// 将指定对象(T)转换成目标对象(U)
+        /// 将父类对象(T)转换成子类对象(U)
         /// </summary>
         /// <typeparam name="T">源对象数据类型</typeparam>
         /// <typeparam name="U">目标对象数据类型</typeparam>
@@ -251,7 +251,8 @@ namespace XqsLibrary
         /// <returns></returns>
         public static U ObjectConvert<T, U>(T sourceObj, out bool result)
             where T : class
-            where U : class,new()
+            where U : class,T,new()
+            
         {
             if (sourceObj == null)
             {
@@ -260,21 +261,16 @@ namespace XqsLibrary
             }
             U destObj = new U();
             Type t = typeof(T);
-            Type u = typeof(U);
-            PropertyInfo[] tps = t.GetProperties();
+            Type u = typeof(U);          
             PropertyInfo[] ups = u.GetProperties();
-            Dictionary<string, PropertyInfo> upDics = new Dictionary<string, PropertyInfo>();
-            foreach (PropertyInfo up in ups)
-            {
-                upDics[up.Name] = up;
-            }
+           
             object value;
-            foreach (PropertyInfo tp in tps)
+            foreach (PropertyInfo tp in ups)
             {
-                if (upDics.ContainsKey(tp.Name))
+                if (tp.CanRead&&tp.CanWrite)
                 {
                     value = tp.GetValue(sourceObj, null);
-                    upDics[tp.Name].SetValue(destObj, value, null);
+                    tp.SetValue(destObj, value, null);
                 }
             }
             result = true;

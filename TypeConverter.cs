@@ -242,14 +242,14 @@ namespace XqsLibrary
         }
 
         /// <summary>
-        /// 将父类对象(T)转换成子类对象(U)
+        /// 从父类对象(T)复制值到子类对象(U)中
         /// </summary>
         /// <typeparam name="T">源对象数据类型</typeparam>
         /// <typeparam name="U">目标对象数据类型</typeparam>
         /// <param name="sourceObj"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static U ObjectConvert<T, U>(T sourceObj, out bool result)
+        public static U CopyFromTParent<T, U>(T sourceObj, out bool result)
             where T : class
             where U : class,T,new()
             

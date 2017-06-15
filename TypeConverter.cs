@@ -251,8 +251,7 @@ namespace XqsLibrary
         /// <returns></returns>
         public static U CopyFromTParent<T, U>(T sourceObj, out bool result)
             where T : class
-            where U : class,T,new()
-            
+            where U : class,T, new()
         {
             if (sourceObj == null)
             {
@@ -261,13 +260,13 @@ namespace XqsLibrary
             }
             U destObj = new U();
             Type t = typeof(T);
-            Type u = typeof(U);          
+            Type u = typeof(U);
             PropertyInfo[] ups = u.GetProperties();
-           
+
             object value;
             foreach (PropertyInfo tp in ups)
             {
-                if (tp.CanRead&&tp.CanWrite)
+                if (tp.CanRead && tp.CanWrite)
                 {
                     value = tp.GetValue(sourceObj, null);
                     tp.SetValue(destObj, value, null);
@@ -286,7 +285,7 @@ namespace XqsLibrary
         /// <param name="dr"></param>
         /// <returns></returns>
         public static T ToModel<T>(DataRow dr) where T : class,new()
-        {            
+        {
             T t = ToModel<T>(dr, null, false);
             return t;
         }
@@ -330,7 +329,8 @@ namespace XqsLibrary
             return Model;
         }
 
-        public static T ToModel<T>(DataRow dr, params string[] ignores) where T : class,new() {
+        public static T ToModel<T>(DataRow dr, params string[] ignores) where T : class,new()
+        {
             T model = new T();
             bool result;
             return ToModel<T>(dr, out result, ignores);
@@ -375,7 +375,8 @@ namespace XqsLibrary
             return model;
         }
 
-        public static List<T> ToModel<T>(DataTable table) where T : class,new() {
+        public static List<T> ToModel<T>(DataTable table) where T : class,new()
+        {
             bool success;
             return ToModel<T>(table, out success);
         }
@@ -499,7 +500,10 @@ namespace XqsLibrary
                     isExits = dr.Table.Columns.Contains(property.Name);
                     if (isExits)
                     {
-                        dr[property.Name] = property.GetValue(Model, null);
+                        if (!property.PropertyType.IsEnum)
+                            dr[property.Name] = property.GetValue(Model, null);
+                        else
+                            dr[property.Name] = (int)property.GetValue(Model, null);
                     }
                 }
             }
@@ -532,7 +536,10 @@ namespace XqsLibrary
                     isExits = columnMaps.ContainsKey(property.Name) && dr.Table.Columns.Contains(property.Name);
                     if (isExits)
                     {
-                        dr[property.Name] = property.GetValue(Model, null);
+                        if (!property.PropertyType.IsEnum)
+                            dr[property.Name] = property.GetValue(Model, null);
+                        else
+                            dr[property.Name] = (int)property.GetValue(Model, null);
                     }
                 }
             }
@@ -569,10 +576,11 @@ namespace XqsLibrary
         /// <typeparam name="T"></typeparam>
         /// <param name="strs"></param>
         /// <returns></returns>
-        public static List<T> ToList<T>(IEnumerable<string> strs) where T : struct 
+        public static List<T> ToList<T>(IEnumerable<string> strs) where T : struct
         {
-            if (strs != null) {
-                Type type=typeof(T);
+            if (strs != null)
+            {
+                Type type = typeof(T);
                 List<T> list = new List<T>();
                 try
                 {

@@ -27,8 +27,8 @@ namespace XqsLibrary
             {
                 if (targetType.IsEnum)
                     property.SetValue(Model, Enum.Parse(targetType, value.ToString()), null);
-                else
-                    property.SetValue(Model, Convert.ChangeType(value, targetType), null);
+                else               
+                    property.SetValue(Model, Convert.ChangeType(value, targetType), null);                
             }
         }
 
@@ -242,14 +242,15 @@ namespace XqsLibrary
         }
 
         /// <summary>
-        /// 从父类对象(T)复制值到子类对象(U)中
+        /// 复制<paramref name="sourceObj"/>对象值
+        /// <remarks>仅复制类型T与U同名字段</remarks>
         /// </summary>
         /// <typeparam name="T">源对象数据类型</typeparam>
         /// <typeparam name="U">目标对象数据类型</typeparam>
         /// <param name="sourceObj"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static U CopyFromTParent<T, U>(T sourceObj, out bool result)
+        public static U Map<T, U>(T sourceObj, out bool result)
             where T : class
             where U : class,T, new()
         {
@@ -432,10 +433,10 @@ namespace XqsLibrary
         /// <typeparam name="T"></typeparam>
         /// <param name="collection"></param>
         /// <returns></returns>
-        public static T ToModel<T>(NameValueCollection collection) where T : class, new()
+        public static T ToModel<T>(NameValueCollection collection, params string[] ignores) where T : class, new()
         {
             bool result = false;
-            return ToModel<T>(collection, out result);
+            return ToModel<T>(collection, out result,ignores);
         }
 
         /// <summary>
@@ -445,12 +446,15 @@ namespace XqsLibrary
         /// <param name="collection"></param>
         /// <param name="result">转换是否发生异常</param>
         /// <returns></returns>
-        public static T ToModel<T>(NameValueCollection collection, out bool result) where T : class, new()
+        public static T ToModel<T>(NameValueCollection collection, out bool result,params string[] ignores) where T : class, new()
         {
             result = true;
             T Model = new T();
             if (collection != null)
             {
+                List<string> ignoreList = new List<string>();
+                if (ignores != null)
+                    ignoreList.AddRange(ignores);
                 try
                 {
                     Type modelType = Model.GetType();
@@ -458,7 +462,7 @@ namespace XqsLibrary
                     bool isExits = true;
                     foreach (PropertyInfo property in properties)
                     {
-                        isExits = collection[property.Name] != null;
+                        isExits = collection[property.Name] != null && !ignoreList.Contains(property.Name);
                         if (isExits)
                         {
                             SetValue(collection[property.Name], property, Model);

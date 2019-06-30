@@ -490,14 +490,15 @@ namespace XqsLibrary
         /// <param name="Model">实体类</param>
         /// <param name="dr"></param>
         /// <returns></returns>
-        public static bool SetDrFromModel<T>(T Model, DataRow dr) where T : new()
+        public static bool SetDrFromModel<T>(T Model, DataRow dr, PropertyInfo[] properties=null) where T : new()
         {
             if (dr == null) { return false; }
             bool result = true;
             try
             {
                 Type modelType = Model.GetType();
-                PropertyInfo[] properties = modelType.GetProperties();
+                if (properties == null)
+                    properties = modelType.GetProperties();
                 bool isExits = true;
                 foreach (PropertyInfo property in properties)
                 {
